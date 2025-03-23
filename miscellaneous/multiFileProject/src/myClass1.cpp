@@ -12,6 +12,10 @@ void MyClass1::setValue(int n, std::string s) {
   num = n;
 }
 
+int MyClass1::getNum() {
+  return num;
+}
+
 void MyClass1::displayInfo() {
   std::cout << "MyClass1 name: " << name << " num" << num << std::endl;
 }

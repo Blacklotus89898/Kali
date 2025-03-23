@@ -1,11 +1,12 @@
 # Multi file project template
 
-## Command line
+## Building and running project
+### Command line
 ```bash 
 g++ src/main.cpp src/myClass1.cpp -Iinclude -o execName
 ```
 
-## Makefile
+### Makefile
 ```bash
 # To build executable
 make 
@@ -14,7 +15,7 @@ make
 make clean
 ```
 
-## CMakeLists.txt
+### CMakeLists.txt
 ```bash
 mkdir build && cd build
 cmake ..
@@ -23,13 +24,11 @@ make
 
 # For cleanup
 rm -r build
-
-
-TODO: add testing with gcode and test automation with exxternal libraries
-```
-```
 ```
 
-```
+## Testing
+```bash
+make tests
+./runTests
 ```
 

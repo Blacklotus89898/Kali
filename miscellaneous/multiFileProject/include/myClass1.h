@@ -17,6 +17,7 @@ public:
   ~MyClass1();
   void setValue(int n, string s);
   void displayInfo();
+  int getNum();
 
 
 private:
