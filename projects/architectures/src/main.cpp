@@ -5,16 +5,17 @@ using namespace std;
 
 int main() {
 
-    cout << "Program entry point" << endl;
-
     cout << "Initiating banking system..." << endl;
+
     BankingSystem* bankingSystem = BankingSystem::getInstance();
+
+    cout << "Banking system status: " << *bankingSystem << endl;
 
     User alice = bankingSystem->addUser("Alice", 1000);
     
-    cout << "User alice:" << alice << endl;
+    cout << "User Alice:" << alice << endl;
 
-    cout << "Bnaking system instance: " << bankingSystem << endl;
+    cout << "Banking system status: " << *bankingSystem << endl;
 
     return 0;
 }
