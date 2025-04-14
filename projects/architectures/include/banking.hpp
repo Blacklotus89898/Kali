@@ -12,7 +12,9 @@ class BankingSystem
 {
 private:
     static BankingSystem *instance; // pointer to unique instance
-    std::vector<User> users; // vector to store user names
+    // std::vector<User> users; // vector to store user names
+    std::vector<User*> users;
+
 
     // private constructor to prevent instantiation
     BankingSystem();
@@ -22,7 +24,11 @@ public:
     static BankingSystem *getInstance();
 
     // method to add a user
-    User addUser(const std::string &userName, int balance);
+    User* addUser(const std::string &userName, int balance);
+
+    // void addUser(const User &user);
+    void addUser(User* user);
+    
 
     // method to display all users
     void displayUsers() const;

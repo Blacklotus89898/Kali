@@ -18,13 +18,19 @@ BankingSystem *BankingSystem::getInstance()
 }
 
 // Method to add a user
-User BankingSystem::addUser(const std::string &userName, int balance = 0)
+User* BankingSystem::addUser(const std::string &userName, int balance = 0)
 {
-    User newUser(userName, balance);
+    User* newUser = new User(userName, balance);
     users.push_back(newUser);
     std::cout << "User " << userName << " added to the banking system." << std::endl;
     return newUser;
 }
+
+void BankingSystem::addUser(User* user) {
+    users.push_back(user);
+    std::cout << "User " << user->getName() << " added to the banking system." << std::endl;
+}
+
 
 // Method to display all users
 void BankingSystem::displayUsers() const
@@ -36,18 +42,19 @@ void BankingSystem::displayUsers() const
     }
 }
 
-std::ostream &operator<<(std::ostream &os, const BankingSystem &bankingSystem)
-{
+std::ostream& operator<<(std::ostream& os, const BankingSystem& bs) {
     os << "BankingSystem with users: ";
-    for (const auto &user : bankingSystem.users)
-    {
-        os << user << " ";
+    for (const auto& user : bs.users) {
+        os << *user << " ";
     }
     return os;
 }
 
 // Destructor
-BankingSystem::~BankingSystem()
-{
+BankingSystem::~BankingSystem() {
+    // Delete all dynamically allocated users
+    for (auto user : users)
+        delete user;
     std::cout << "BankingSystem instance destroyed." << std::endl;
 }
+

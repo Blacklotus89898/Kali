@@ -29,6 +29,11 @@ std::ostream& operator<<(std::ostream& os, const User& user) {
     return os;
 }
 
+// Clone method to create a copy of the current user
+User* User::clone() {
+    return new User(*this); // Create a new User object as a copy of the current one
+}
+
 // Destructor
 User::~User() {
     // No dynamic memory to clean up, so the destructor is empty

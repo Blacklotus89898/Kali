@@ -7,6 +7,8 @@
 ## Design patterns
 
 - Creational
+  - Singleton: bankingsystem
+  - Prototype: Users to be cloned
 - Behavioral
 - Structural
 

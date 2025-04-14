@@ -25,6 +25,9 @@ public:
     // Setter for balance
     void setBalance(int newBalance);
 
+    // Clone method to create a copy of the current user
+    User* clone();
+
     // Overloading the << operator to print user details
     friend std::ostream& operator<<(std::ostream& os, const User& user);
 
