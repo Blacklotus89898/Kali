@@ -1,6 +1,10 @@
 # Compiler and flags
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -Iinclude
+# CXXFLAGS := -std=c++17 -Wall -Wextra -g -Iinclude
+
+# Windows static linking to aoid dll conflict
+CXXFLAGS := -std=c++17 -Wall -Wextra -g -Iinclude -static-libstdc++ -static-libgcc
+
 
 # Source and build directories
 SRC_DIR := src

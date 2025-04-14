@@ -50,5 +50,4 @@ std::ostream &operator<<(std::ostream &os, const BankingSystem &bankingSystem)
 BankingSystem::~BankingSystem()
 {
     std::cout << "BankingSystem instance destroyed." << std::endl;
-    delete instance;
 }
