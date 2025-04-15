@@ -4,6 +4,14 @@
 #include <vector>
 #include <iostream>
 
+// Linear regression model class
+// TODO:
+// Simple linear
+// Multiple linear
+// Polynomial linear
+// Logistic linear
+// Multivariate linear
+// Logistic functio
 template <typename T>
 class LinearModel {
 public:
@@ -33,6 +41,17 @@ public:
 
     void print_parameters() const {
         std::cout << "Weight: " << weight << ", Bias: " << bias << std::endl;
+    }
+
+    T sse(const std::vector<T>& x, const std::vector<T>& y) const {
+        T sum_squared_error = 0;
+        size_t n = x.size();
+        for (size_t i = 0; i < n; ++i) {
+            T prediction = predict(x[i]);
+            T error = prediction - y[i];
+            sum_squared_error += error * error;
+        }
+        return sum_squared_error;
     }
 
 private:
