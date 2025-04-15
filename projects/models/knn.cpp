@@ -6,6 +6,10 @@
 #include <stdexcept>
 #include <numeric>
 
+
+
+// TODO: Improve using KDTree or Ball Tree for faster nearest neighbor search
+
 /**
  * @class KNN
  * @brief A simple implementation of the k-Nearest Neighbors (k-NN) algorithm.
