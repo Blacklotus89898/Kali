@@ -145,7 +145,18 @@ private:
                 majority_label = label;
             }
         }
+        // discrete prediction
         return majority_label;
+    }
+
+    // continuous prediction for all labels
+    std::unordered_map<int, float> continuous_vote(const std::vector<std::pair<float, int>>& distances) const {
+        std::unordered_map<int, float> vote_count;
+        for (const auto& [distance, label] : distances) {
+            float weight = weighted ? 1.0f / (distance + std::numeric_limits<float>::epsilon()) : 1.0f;
+            vote_count[label] += weight;
+        }
+        return vote_count;
     }
 
     int k;
