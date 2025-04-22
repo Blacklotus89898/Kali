@@ -3,12 +3,20 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+// #include "accounts.hpp" // circular dependency, need to fix this
+
+class Account;
+class AccountBuilder;
 
 // Can add roles and UML for later
 class User {
 private:
     std::string name;
     int balance;
+    int profileId;
+    int interestRate;
+    std::vector<Account*> accounts;
 
 public:
     User(std::string name, int balance);
@@ -24,6 +32,12 @@ public:
 
     // Setter for balance
     void setBalance(int newBalance);
+
+
+    void addAccount(Account* account); 
+
+    std::vector<Account*>& getAccounts();
+    
 
     // Clone method to create a copy of the current user
     User* clone();

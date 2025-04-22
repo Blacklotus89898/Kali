@@ -1,4 +1,5 @@
 #include "../include/users.hpp"
+#include "../include/accounts.hpp"
 
 // Constructor
 User::User(std::string name, int balance) : name(std::move(name)), balance(balance) {}
@@ -23,6 +24,16 @@ void User::setBalance(int newBalance) {
     balance = newBalance;
 }
 
+void User::addAccount(Account* account)
+{
+    accounts.push_back(account);
+    std::cout << "Account of type " << account << " added to user " << name << "." << std::endl;
+}
+
+std::vector<Account*>& User::getAccounts()
+{
+    return accounts;
+}
 // Overloading the << operator to print user details
 std::ostream& operator<<(std::ostream& os, const User& user) {
     os << "User{name: " << user.name << ", balance: " << user.balance << "}";
