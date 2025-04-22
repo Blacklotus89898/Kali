@@ -1,46 +1,43 @@
 #include <iostream>
 #include <vector>
-#include <cmath>
 
-// using string is too costy, use arrays
 using namespace std;
 
 int main() {
     int m, s;
     cin >> m >> s;
 
+    // Impossible case
     if (s > m * 9 || (s == 0 && m > 1)) {
         cout << "-1 -1" << endl;
         return 0;
     }
 
-    vector<int> min_num(m, 0), max_num(m, 0);
-    int remaining_s = s;
+    int max_s = s, min_s = s;
 
-    // One-pass loop
+    // ---- Build MAX number ----
+    vector<int> max_digits(m, 0);
     for (int i = 0; i < m; ++i) {
-        // Fill max number from left (biggest digits first)
-        int max_digit = min(9, remaining_s);
-        max_num[i] = max_digit;
-        remaining_s -= max_digit;
+        int digit = min(9, max_s);
+        max_digits[i] = digit;
+        max_s -= digit;
     }
 
-    remaining_s = s - 1; // Reserve 1 to ensure first digit isn't zero
-    min_num[0] = 1;
-
-    for (int i = m - 1; i >= 0; --i) {
-        int min_digit = min(9, remaining_s);
-        min_num[i] += min_digit;
-        remaining_s -= min_digit;
+    // ---- Build MIN number ----
+    vector<int> min_digits(m, 0);
+    min_s--;  // Reserve 1 for the most significant digit
+    for (int i = m - 1; i > 0; --i) {
+        int digit = min(9, min_s);
+        min_digits[i] = digit;
+        min_s -= digit;
     }
+    min_digits[0] = min_s + 1;  // Add back the reserved 1
 
-    // Convert arrays to integer values
-    int min_val = 0, max_val = 0;
-    for (int i = 0; i < m; ++i) {
-        min_val = min_val * 10 + min_num[i];
-        max_val = max_val * 10 + max_num[i];
-    }
+    // Output
+    for (int d : min_digits) cout << d;
+    cout << " ";
+    for (int d : max_digits) cout << d;
+    cout << endl;
 
-    cout << min_val << " " << max_val << endl;
     return 0;
 }
