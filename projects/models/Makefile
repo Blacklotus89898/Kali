@@ -10,7 +10,7 @@ INCLUDE_DIR := include
 DATA_DIR := data  # You mentioned 'data' but it's not used in compilation, just here for reference
 
 # Source and object files
-SRCS := $(SRC_DIR)/main.cpp $(SRC_DIR)/helper.cpp
+SRCS := $(SRC_DIR)/main.cpp $(SRC_DIR)/helper.cpp $(SRC_DIR)/knn.cpp 
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 # Default target
