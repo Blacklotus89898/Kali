@@ -5,6 +5,8 @@
 #include <cmath> // For std::abs, std::sqrt, std::pow
 #include <numeric> // For std::accumulate
 #include <algorithm> // Include this for std::max_element, std::min_element, and std::find
+#include <filesystem> // For std::filesystem
+#include <fstream> // For file operations
 
 
 
@@ -145,7 +147,114 @@ int main(int argc, char** argv) {
 
     // Filesystem
 
+
+    namespace fs = std::filesystem;
+
+    // Create a file, directory, and check if it exists
+    std::string dirName = "example_dir";
+    if (!fs::exists(dirName)) {
+        fs::create_directory(dirName);
+        std::cout << "Directory created: " << dirName << std::endl;
+    } else {
+        std::cout << "Directory already exists: " << dirName << std::endl;
+    }
+
+    std::string filePath = dirName + "/example_file.txt";
+    if (!fs::exists(filePath)) {
+        std::ofstream newFile(filePath);
+        if (newFile.is_open()) {
+            newFile << "This is a test file." << std::endl;
+            newFile.close();
+            std::cout << "File created: " << filePath << std::endl;
+        } else {
+            std::cerr << "Unable to create file: " << filePath << std::endl;
+        }
+    } else {
+        std::cout << "File already exists: " << filePath << std::endl;
+    }
+
+    // Read a file
+    std::ifstream inFile(filePath);
+    if (inFile.is_open()) {
+        std::cout << "Reading from file: " << filePath << std::endl;
+        std::string line;
+        while (std::getline(inFile, line)) {
+            std::cout << line << std::endl;
+        }
+        inFile.close();
+    } else {
+        std::cerr << "Unable to open file for reading: " << filePath << std::endl;
+    }
+
+    // Write to a file
+    std::ofstream outFile(filePath, std::ios::trunc); // Truncate the file
+    if (outFile.is_open()) {
+        outFile << "Overwriting the file with new content." << std::endl;
+        outFile.close();
+        std::cout << "File overwritten: " << filePath << std::endl;
+    } else {
+        std::cerr << "Unable to open file for writing: " << filePath << std::endl;
+    }
+
+    // Append to a file
+    std::ofstream appendFile(filePath, std::ios::app); // Append mode
+    if (appendFile.is_open()) {
+        appendFile << "Appending this line to the file." << std::endl;
+        appendFile.close();
+        std::cout << "Content appended to file: " << filePath << std::endl;
+    } else {
+        std::cerr << "Unable to open file for appending: " << filePath << std::endl;
+    }
+
+
+
     // Iterators
+    // Iterators with vector
+    std::cout << "Iterating through vector using iterators: ";
+    for (auto it = vec.begin(); it != vec.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+
+    // Reverse iterator
+    std::cout << "Iterating in reverse order: ";
+    for (auto rit = vec.rbegin(); rit != vec.rend(); ++rit) {
+        std::cout << *rit << " ";
+    }
+    std::cout << std::endl;
+
+    // Const iterator
+    std::cout << "Using const iterator: ";
+    for (std::vector<int>::const_iterator cit = vec.cbegin(); cit != vec.cend(); ++cit) {
+        std::cout << *cit << " ";
+    }
+    std::cout << std::endl;
+
+    // Map iterators
+    std::cout << "Iterating through map: ";
+    for (auto it = myMap.begin(); it != myMap.end(); ++it) {
+        std::cout << it->first << ": " << it->second << ", ";
+    }
+    std::cout << std::endl;
+
+    // Range-based for loop (uses iterators internally)
+    std::cout << "Range-based for loop: ";
+    for (const auto& i : vec) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+
+    // Iterator with std::advance
+    auto it = vec.begin();
+    std::advance(it, 2); // Move iterator forward by 2 positions
+    std::cout << "Element at 3rd position using std::advance: " << *it << std::endl;
+
+    // Iterator with std::next and std::prev
+    auto nextIt = std::next(vec.begin(), 3); // Get iterator to 4th element
+    std::cout << "4th element using std::next: " << *nextIt << std::endl;
+
+    auto prevIt = std::prev(vec.end(), 2); // Get iterator to 2nd last element
+    std::cout << "2nd last element using std::prev: " << *prevIt << std::endl;
 
     // DSA and algorithms
     
