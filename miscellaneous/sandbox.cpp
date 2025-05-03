@@ -1,7 +1,10 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cmath>
+#include <iostream> // For std::cout, std::cin
+#include <string> // For std::string
+#include <vector> // For std::vector
+#include <map> // For std::map
+#include <cmath> // For std::abs, std::sqrt, std::pow
+#include <numeric> // For std::accumulate
+#include <algorithm> // Include this for std::max_element, std::min_element, and std::find
 
 
 
@@ -101,6 +104,50 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 
 
+    // STL 
+    // Vector
+    std::vector<int> vec = {1, 2, 3, 4, 5};
+    std::cout << "Vector size: " << vec.size() << std::endl;
+    std::cout << "Vector elements: ";
+    for (const auto& i : vec) {
+        std::cout << i << " ";
+    }
+
+    std::cout << std::endl;
+
+    std::cout << "Vector sum: " << std::accumulate(vec.begin(), vec.end(), 0) << std::endl;
+    std::cout << "Vector max: " << *std::max_element(vec.begin(), vec.end()) << std::endl;
+
+    std::cout << "Vector min: " << *std::min_element(vec.begin(), vec.end()) << std::endl;
+
+    std::cout << "Vector average: " << (std::accumulate(vec.begin(), vec.end(), 0) / static_cast<double>(vec.size())) << std::endl;
+
+
+    std::cout << "Is 3 in the vector: " << (std::find(vec.begin(), vec.end(), 3) != vec.end() ? "Yes" : "No") << std::endl; 
+
+    // Map
+    std::map<std::string, int> myMap = {{"one", 1}, {"two", 2}, {"three", 3}};
+    std::cout << "Map size: " << myMap.size() << std::endl;
+    std::cout << "Map elements: ";
+    for (const auto& pair : myMap) {
+        std::cout << pair.first << ": " << pair.second << ", "; //only accessible this way
+    }
+
+    std::cout << std::endl;
+
+    std::cout << "Map value for 'two': " << myMap["two"] << std::endl;
+    myMap["two"] = 22; // Update value
+
+    std::cout << "Exists in map: " << (myMap.find("two") != myMap.end() ? "Yes" : "No") << std::endl;
+    
+    std::cout << "Exists in map" << myMap.count("two")  << std::endl;
+    
+
+    // Filesystem
+
+    // Iterators
+
+    // DSA and algorithms
     
     return 0;
 }
