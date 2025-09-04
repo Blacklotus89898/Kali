@@ -30,11 +30,14 @@ int main() {
     }
 
     for (const auto& row: d) {
-        for (const int& x: row) {
-            if (x == -1) {
-                std::cout << "  ";
+        for (auto it = row.begin(); it != row.end(); ++it) {
+            if (*it == -1) {
+                std::cout << " ";
             } else {
-                std::cout << x << " ";
+                std::cout << *it;
+            }
+            if (std::next(it) != row.end()) { // Add space except for the last element
+                std::cout << " ";
             }
         }
         std::cout << std::endl;
