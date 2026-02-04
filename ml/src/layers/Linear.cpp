@@ -1,80 +1,61 @@
 #include "layers/Linear.hpp"
+#include "core/Autograd.hpp"
+#include <cmath>
+#include <random>
 
 namespace ml {
 
-// Implementation of the Constructor
-Linear::Linear(int in_dim, int out_dim) 
-    : weights(out_dim, in_dim), 
-      bias(1, out_dim), 
-      last_input(0, 0), 
-      grad_weights(out_dim, in_dim), 
-      grad_bias(1, out_dim),
-      sq_grad_w(out_dim, in_dim), // Initialize RMSProp caches
-      sq_grad_b(1, out_dim) 
-{
-    // He Initialization (Better for LeakyReLU/ReLU)
+  Linear::Linear(int in_dim, int out_dim) 
+    : weights(out_dim, in_dim), bias(1, out_dim), 
+    grad_weights(out_dim, in_dim), grad_bias(1, out_dim) 
+  {
+    // He Initialization
     double limit = std::sqrt(2.0 / in_dim); 
     std::mt19937 gen(std::random_device{}());
     std::uniform_real_distribution<double> dist(-limit, limit);
 
     for (auto& w : weights.data) w = dist(gen);
-    for (auto& b : bias.data) b = 0.0;
-    
-    // RMSProp caches start at 0
-    for (auto& sw : sq_grad_w.data) sw = 0.0;
-    for (auto& sb : sq_grad_b.data) sb = 0.0;
-}
+    bias.fill(0.0);
+  }
 
-Matrix Linear::forward(const Matrix& input) {
-    last_input = input; 
+  VarPtr Linear::forward_autograd(VarPtr input) {
     Matrix weights_T = weights.transpose();
-    Matrix output = Matrix::multiply(input, weights_T);
+    Matrix out_data = Matrix::multiply(input->data, weights_T);
 
-    for (int i = 0; i < output.rows; ++i) {
-        for (int j = 0; j < output.cols; ++j) {
-            output(i, j) += bias(0, j);
-        }
+    // Apply Bias
+    for (int i = 0; i < out_data.rows; ++i) {
+      for (int j = 0; j < out_data.cols; ++j) out_data(i, j) += bias(0, j);
     }
-    return output;
-}
 
-Matrix Linear::backward(const Matrix& grad_output) {
-    Matrix grad_output_T = grad_output.transpose();
-    
-    // dL/dW = grad_output^T * last_input
-    grad_weights = Matrix::multiply(grad_output_T, last_input);
+    auto output = std::make_shared<Variable>(out_data);
+    output->parents = {input};
 
-    // dL/dB = sum over batch
-    for (int j = 0; j < grad_output.cols; ++j) {
+    output->backward_op = [this, input, output]() {
+      // dL/dW
+      Matrix gW = Matrix::multiply(output->grad.transpose(), input->data);
+      for(size_t i = 0; i < grad_weights.data.size(); ++i) grad_weights.data[i] += gW.data[i];
+
+      // dL/dB
+      for (int j = 0; j < output->grad.cols; ++j) {
         double sum = 0;
-        for (int i = 0; i < grad_output.rows; ++i) {
-            sum += grad_output(i, j);
-        }
-        grad_bias(0, j) = sum;
-    }
+        for (int i = 0; i < output->grad.rows; ++i) sum += output->grad(i, j);
+        grad_bias(0, j) += sum;
+      }
 
-    // dL/dX = grad_output * weights
-    return Matrix::multiply(grad_output, weights);
+      // dL/dX
+      Matrix gX = Matrix::multiply(output->grad, weights);
+      for(size_t i = 0; i < input->grad.data.size(); ++i) input->grad.data[i] += gX.data[i];
+    };
+    return output;
+  }
+
+  void Linear::zero_grad() {
+    grad_weights.fill(0.0);
+    grad_bias.fill(0.0);
+  }
+
+  // Simple wrappers for inference
+  Matrix Linear::forward(const Matrix& input) { return Matrix::multiply(input, weights.transpose()); }
+  Matrix Linear::backward(const Matrix& grad_output) { return Matrix::multiply(grad_output, weights); }
+
 }
-
-void Linear::update(double lr) {
-    const double epsilon = 1e-8;
-    const double beta = 0.9; // Decay rate for RMSProp
-
-    // Update Weights with RMSProp
-    for (size_t i = 0; i < weights.data.size(); ++i)  {
-        // 1. Accumulate squared gradients
-        sq_grad_w.data[i] = beta * sq_grad_w.data[i] + (1.0 - beta) * (grad_weights.data[i] * grad_weights.data[i]);
-        
-        // 2. Update weights: grad / sqrt(cache + eps)
-        weights.data[i] -= (lr / (std::sqrt(sq_grad_w.data[i]) + epsilon)) * grad_weights.data[i];
-    }
-
-    // Update Bias with RMSProp
-    for (size_t i = 0; i < bias.data.size(); ++i) {
-        sq_grad_b.data[i] = beta * sq_grad_b.data[i] + (1.0 - beta) * (grad_bias.data[i] * grad_bias.data[i]);
-        bias.data[i] -= (lr / (std::sqrt(sq_grad_b.data[i]) + epsilon)) * grad_bias.data[i];
-    }
-}
-
-} // namespace ml

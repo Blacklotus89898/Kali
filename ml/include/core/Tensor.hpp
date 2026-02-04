@@ -60,6 +60,13 @@ public:
             std::cout << "\n";
         }
     }
+
+    // Inside class Matrix in Tensor.hpp
+void fill(double value) {
+    for (auto& val : data) {
+        val = value;
+    }
+}
 };
 
 } // namespace ml

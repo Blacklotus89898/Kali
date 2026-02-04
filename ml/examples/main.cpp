@@ -1,78 +1,63 @@
 #include <iostream>
-#include <string>
+#include <vector>
+#include "core/Autograd.hpp"
 #include "core/DataGenerator.hpp"
 #include "core/DataLoader.hpp"
 #include "layers/Linear.hpp"
 #include "functions/Activations.hpp"
 #include "functions/Loss.hpp"
+#include "optim/RMSProp.hpp"
 
 using namespace ml;
 
 int main() {
-    const std::string dataFile = "xor_data.csv";
+    const std::string spiralFile = "spiral_data.csv";
+    int n_points = 300; // 300 points per arm = 600 total
+    
+    DataGenerator::generateSpiralData(spiralFile, n_points, 0.01);
+    auto [raw_X, raw_Y] = DataLoader::loadCSV(spiralFile, n_points * 2, 2, 1);
 
-    // 1. Generate the data file
-    DataGenerator::generateXOR(dataFile);
+    auto X = std::make_shared<Variable>(raw_X);
+    auto Y = std::make_shared<Variable>(raw_Y);
 
-    // 2. Load the data (4 samples, 2 inputs, 1 output)
-    auto [X, Y] = DataLoader::loadCSV(dataFile, 4, 2, 1);
+    // 2. Deeper Model: 2 -> 32 -> 16 -> 1
+    Linear l1(2, 32);
+    LeakyReLU a1(0.1);
+    Linear l2(32, 16);
+    LeakyReLU a2(0.1);
+    Linear l3(16, 1);
 
-    // 3. Setup Model (2 -> 8 -> 1)
-    // Using LeakyReLU to prevent "Dying ReLU" during Autograd testing
-    Linear l1(2, 8);
-    LeakyReLU a1(0.01); 
-    Linear l2(8, 1);
+    std::vector<Linear*> model_layers = {&l1, &l2, &l3};
+    RMSProp optimizer(0.002); // Spiral is sensitive, lower LR helps
+    
+    std::cout << "Training on the Spiral Problem (3-Layer Network)...\n";
 
-    // RMSProp usually prefers a smaller, stable learning rate
-    double lr = 0.01; 
-    int epochs = 3000;
+    for (int epoch = 0; epoch <= 1000; ++epoch) {
+        // --- Forward (Deep Chain) ---
+        auto h1 = a1.forward_autograd(l1.forward_autograd(X));
+        auto h2 = a2.forward_autograd(l2.forward_autograd(h1));
+        auto preds = l3.forward_autograd(h2);
+        auto loss = MSE_Autograd(preds, Y);
 
-    std::cout << "Training from file: " << dataFile << " using RMSProp...\n";
+        // --- Backward ---
+        l1.zero_grad();
+        l2.zero_grad();
+        l3.zero_grad();
+        loss->backward();
 
-    // 4. Training Loop
-    for (int epoch = 0; epoch <= epochs; ++epoch) {
-        // Forward
-        Matrix z1 = l1.forward(X);
-        Matrix h1 = a1.forward(z1);
-        Matrix preds = l2.forward(h1);
+        // --- Step ---
+        optimizer.step(model_layers);
 
-        // Loss
-        double loss = MSE::compute(preds, Y);
-
-        // Backward (Manual Chain Rule)
-        Matrix grad = MSE::backward(preds, Y);
-        Matrix grad_l2 = l2.backward(grad);
-        Matrix grad_a1 = a1.backward(grad_l2);
-        l1.backward(grad_a1);
-
-        // Update (Now uses RMSProp logic internally)
-        l1.update(lr);
-        l2.update(lr);
-
-        if (epoch % 500 == 0) {
-            std::cout << "Epoch " << epoch << " | Loss: " << loss << "\n";
+        if (epoch % 100 == 0) {
+            int correct = 0;
+            for(int i=0; i < n_points * 2; ++i) {
+                int p = (preds->data(i,0) > 0.5) ? 1 : 0;
+                if (p == static_cast<int>(Y->data(i,0))) correct++;
+            }
+            std::cout << "Epoch " << epoch << " | Loss: " << loss->data.data[0] 
+                      << " | Accuracy: " << (static_cast<double>(correct)/(n_points*2)) * 100 << "%\n";
         }
     }
-
-    // 5. Performance Evaluation
-    std::cout << "\n--- Performance Analysis ---\n";
-    Matrix finalPreds = l2.forward(a1.forward(l1.forward(X)));
-    int correct = 0;
-
-    for (int i = 0; i < finalPreds.rows; ++i) {
-        // Rounding logic for binary classification
-        int prediction = (finalPreds(i, 0) > 0.5) ? 1 : 0;
-        int target = static_cast<int>(Y(i, 0)); // Fixed static_cast syntax
-        
-        if (prediction == target) correct++;
-
-        std::cout << "Input: [" << X(i,0) << "," << X(i,1) << "] "
-                  << "Target: " << target << " | Prediction: " << finalPreds(i,0) 
-                  << " -> " << (prediction == target ? "PASS" : "FAIL") << "\n";
-    }
-
-    std::cout << "---------------------------\n";
-    std::cout << "Accuracy: " << (static_cast<double>(correct) / Y.rows) * 100.0 << "%\n";
 
     return 0;
 }
